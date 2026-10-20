@@ -35,82 +35,13 @@ A refatoração adotou o padrão **Memento (GoF)**, separando claramente as resp
 
 ---
 
-## Diagramas de Classes
+## Estrutura das Classes
 
-### Antes (Anti-Pattern)
-```mermaid
-classDiagram
-    direction LR
-
-    class Jogo {
-        -String fase
-        -int vidas
-        -int pontuacao
-        -double x
-        -double y
-        +jogar(fase, vidas, pontuacao, x, y)
-        +getFase() String
-        +setFase(fase)
-        +getVidas() int
-        +setVidas(vidas)
-        +getPontuacao() int
-        +setPontuacao(pontuacao)
-        +getX() double
-        +setX(x)
-        +getY() double
-        +setY(y)
-    }
-
-    class GerenciadorSave {
-        -List~String[]~ checkpoints
-        +salvar(Jogo jogo)
-        +restaurar(Jogo jogo)
-    }
-
-    GerenciadorSave ..> Jogo : manipula todos os getters/setters (acoplamento íntimo)
-```
-
-### Depois (Padrão Memento)
-```mermaid
-classDiagram
-    direction LR
-
-    class Checkpoint {
-        <<interface>>
-        %% Interface Estreita: sem métodos expostos para o Caretaker
-    }
-
-    class JogoCheckpoint {
-        -String fase
-        -int vidas
-        -int pontuacao
-        -double x
-        -double y
-        %% Interface Ampla: acessível apenas pelo Jogo
-    }
-    Checkpoint <|.. JogoCheckpoint : implementa
-
-    class Jogo {
-        -String fase
-        -int vidas
-        -int pontuacao
-        -double x
-        -double y
-        +jogar(fase, vidas, pontuacao, x, y)
-        +salvar() Checkpoint
-        +restaurar(Checkpoint checkpoint)
-    }
-
-    class GerenciadorSave {
-        -Deque~Checkpoint~ checkpoints
-        +salvar(Checkpoint checkpoint)
-        +restaurar() Checkpoint
-    }
-
-    Jogo +-- JogoCheckpoint : record privado interno
-    Jogo ..> Checkpoint : cria e restaura
-    GerenciadorSave o-- Checkpoint : armazena (Caretaker)
-```
+* **`Checkpoint`:** Interface estreita marcadora implementada pelo memento.
+* **`Jogo`:** Originator responsável pelas mecânicas do jogo e por gerar/consumir checkpoints.
+* **`Jogo.JogoCheckpoint`:** Record interno privado que armazena os valores imutáveis do estado salvo.
+* **`GerenciadorSave`:** Caretaker responsável por empilhar e desempilhar os snapshots do jogo de forma desacoplada.
+* **`Main`:** Ponto de entrada demonstrando o fluxo de jogo, salvamento e restauração de estado.
 
 ---
 
